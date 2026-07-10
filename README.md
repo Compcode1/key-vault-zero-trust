@@ -40,10 +40,4 @@ Building zero-trust automation architectures is only half of the security engine
 * Step 1: Formulate a unified telemetry search string to link sign-in timestamps and Key Vault secret extractions into a scannable dashboard format.
 * Step 2: Execute an intentional failure test by mutating your Key Vault Access Policy or Azure RBAC role to confirm the logging engine immediately catches unauthorized secret access blocks.
 
-### SECTION 11: CLINICAL CASE STUDIES
 
-#### CASE STUDY 01: ADVANCED OIDC PERIMETER DEFENSE VALIDATION
-* Configuration: Local GitHub Actions Runner executing deploy-mesh.yml workflow utilizing a federated identity token endpoint credential block.
-* Action: Subject runner initiates a token exchange request against the Microsoft Entra ID token endpoint using a client configuration value mutated with a trailing structural string break (-BREAKING-TEST).
-* Outcome: Hard Boolean: Failure.
-* Technical Logic: The incoming assertion failed the tenant edge authentication mapping. Because the client identifier value could not be translated to an active application instance registered within the directory store metadata layer, the request was abandoned at the boundary. No authentication token was minted, and zero transactions were broadcast to downstream telemetry components.
