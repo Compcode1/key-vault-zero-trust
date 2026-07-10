@@ -40,4 +40,39 @@ Building zero-trust automation architectures is only half of the security engine
 * Step 1: Formulate a unified telemetry search string to link sign-in timestamps and Key Vault secret extractions into a scannable dashboard format.
 * Step 2: Execute an intentional failure test by mutating your Key Vault Access Policy or Azure RBAC role to confirm the logging engine immediately catches unauthorized secret access blocks.
 
+# Lab Summary: Secure Secret Extraction via Passwordless OIDC
 
+## The Big Picture (What We Actually Did)
+We connected a GitHub code repository directly to an Azure Key Vault so that an automated script could log in, pull a secret, and leave a secure audit trail—all without using a single password, client secret, or certificate. 
+
+At first glance, cloud security looks incredibly complicated because there are dozens of screens, different admin centers, and massive strings of random numbers (IDs). But underneath the surface, it is highly repetitive. Once you understand that you are just proving identity and granting permission, the steps become predictable.
+
+---
+
+## The Plain-Talk Step-by-Step
+
+### 1. Separating the Control Rooms (The Portals)
+We cleared up a major pain point by separating our workspace into two distinct areas:
+*   **The Microsoft Entra Admin Center:** The "ID office" where we manage digital identities and application permissions.
+*   **The Azure Portal:** The "factory floor" where actual infrastructure resources (like Resource Groups and Key Vaults) live.
+
+### 2. Gathering the Digital Coordinates (The IDs)
+To make two different platforms (GitHub and Azure) talk to each other, we collected three specific coordinates to ensure our script knew exactly where to go:
+*   **Tenant ID:** The unique address of your entire corporate Microsoft identity directory.
+*   **Client ID:** The specific identity card of our automated bot (`app-automation-bot`).
+*   **Subscription ID:** The billing and resource boundary where our actual target assets are deployed.
+
+### 3. Establishing the "Handshake" (Workload Identity Federation)
+Instead of typing a password into GitHub (which can be stolen), we used OpenID Connect (OIDC). 
+*   We went into the **Entra Admin Center** and told our bot account: *"If a script requests access, and it proves it is running inside the specific GitHub organization `Compcode1` and the specific repository `key-vault-zero-trust` on the `main` branch, trust it."*
+*   When Entra ID strictly blocked our first attempt, we looked at the logs, realized the repository name had changed from a previous project phase, updated the string, and the handshake cleared perfectly.
+
+### 4. Running the Pipeline & Verifying the Telemetry
+*   With the trust link built, we triggered the automation script inside **GitHub Actions**.
+*   The script successfully knocked on Azure's door, used the passwordless handshake to authenticate, reached into the Key Vault, and pulled the secret (`secret-sgt`) safely.
+*   The system successfully masked the raw secret values in the logs (`***`) to protect the data plane, while leaving a clean telemetry trail in the Log Analytics Workspace.
+
+---
+
+## The Takeaway
+Cloud security architectures look like a maze, but they are just digital plumbing. You map the IDs, align the names case-by-case, and establish a clear relationship between the **Identity** (Entra ID), the **Runner** (GitHub), and the **Target** (Azure Key Vault).
